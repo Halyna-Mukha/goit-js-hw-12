@@ -11,9 +11,10 @@ const lightbox = new SimpleLightbox('.gallery a', {
 
 lightbox.refresh();
 
-export function renderGallery(images) {
-  images.forEach(image => {
-    const cardEl = `
+
+export function renderGallery(images, isLastPage) {
+  let galleryItemsHTML = images.reduce((acc, image) => {
+    return acc + `
       <li class="gallery-item">
         <a href="${image.largeImageURL}" class="gallery-link">
           <img src="${image.webformatURL}" alt="${image.tags}" class="gallery-img">
@@ -26,14 +27,13 @@ export function renderGallery(images) {
         </a>
       </li>
     `;
-    galleryElement.insertAdjacentHTML('beforeend', cardEl);
-  });
+  }, "");
+
+  if (isLastPage) {
+    galleryItemsHTML += `<p class="end-message">We're sorry, but you've reached the end of search results.</p>`;
+  }
+
+  galleryElement.insertAdjacentHTML('beforeend', galleryItemsHTML);
+
   lightbox.refresh();
-}
-export function showEndOfCollectionMessage() {
-  const endMessage = document.createElement('p');
-  endMessage.classList.add('end-message');
-  endMessage.textContent =
-    "We're sorry, but you've reached the end of search results.";
-  galleryElement.insertAdjacentElement('afterend', endMessage);
 }
