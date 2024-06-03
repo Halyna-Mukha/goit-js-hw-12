@@ -54,17 +54,20 @@ async function submitHandle(event) {
       galleryElement.innerHTML = '';
       iziToast.info({
         title: 'Info',
-        message:
-          'Sorry, there are no images matching your search query. Please try again!',
+        message: 'Sorry, there are no images matching your search query. Please try again!',
         position: 'topRight',
       });
       hideLoadMoreBtn();
       return;
     } else {
-      renderGallery(images.hits);
+      const isLastPage = perPage * pageCounter >= totalHits;
+      renderGallery(images.hits, isLastPage);
       inputElement.value = '';
-      showLoadMoreBtn();
+      if (!isLastPage) {
+        showLoadMoreBtn();
+      }
     }
+
     if (perPage * pageCounter >= totalHits) {
       hideLoadMoreBtn();
       showEndOfCollectionMessage();
@@ -89,15 +92,15 @@ loadMoreBtn.addEventListener('click', async () => {
     const images = await fetchImages(searchTerm, pageCounter, perPage);
     const totalHits = images.totalHits;
 
-    renderGallery(images.hits);
-    showLoader();
-    if (perPage * pageCounter >= totalHits) {
+    const isLastPage = perPage * pageCounter >= totalHits;
+    renderGallery(images.hits, isLastPage);
+
+    if (isLastPage) {
       hideLoadMoreBtn();
       showEndOfCollectionMessage();
     }
 
-    const galleryCardHeight =
-      galleryElement.firstElementChild.getBoundingClientRect().height;
+    const galleryCardHeight = galleryElement.firstElementChild.getBoundingClientRect().height;
     window.scrollBy({ top: galleryCardHeight * 3, behavior: 'smooth' });
   } catch (error) {
     console.error('Error fetching more images:', error);
@@ -122,6 +125,15 @@ function hideEndOfCollectionMessage() {
   const endMessage = document.querySelector('.end-message');
   if (endMessage) {
     endMessage.remove();
+  }
+}
+
+function showEndOfCollectionMessage() {
+  if (!document.querySelector('.end-message')) {
+    const endMessage = document.createElement('p');
+    endMessage.classList.add('end-message');
+    endMessage.textContent = "We're sorry, but you've reached the end of search results.";
+    galleryElement.insertAdjacentElement('beforeend', endMessage);
   }
 }
 

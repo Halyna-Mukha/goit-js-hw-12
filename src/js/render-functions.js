@@ -37,3 +37,4 @@ export function renderGallery(images, isLastPage) {
 
   lightbox.refresh();
 }
+
